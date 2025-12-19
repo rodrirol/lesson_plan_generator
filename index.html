@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LWTC Lesson Plan Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="logo">CCPS Post-Secondary</div>
+                    <div class="subtitle">LWTC Lesson Plan Generator</div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <i class="fas fa-chalkboard-teacher fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Fill out all required fields (*) then click "Generate PDF" to create your lesson plan.
+                </div>
+            </div>
+        </div>
+
+        <!-- Lesson Plan Form -->
+        <form id="lessonPlanForm">
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="instructor" class="form-label required">Instructor Name</label>
+                        <input type="text" class="form-control" id="instructor" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="date" class="form-label required">Date</label>
+                        <input type="date" class="form-control" id="date" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Goals Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-bullseye"></i> Learning Goals</h3>
+                <div class="mb-3">
+                    <label for="learningGoals" class="form-label required">What am I teaching today/this week?</label>
+                    <textarea class="form-control" id="learningGoals" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required">How challenging is this for my students?</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="challengeLevel" id="basic" value="Basic" checked>
+                        <label class="form-check-label" for="basic">Basic</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="challengeLevel" id="moderate" value="Moderate">
+                        <label class="form-check-label" for="moderate">Moderate</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="challengeLevel" id="advanced" value="Advanced">
+                        <label class="form-check-label" for="advanced">Advanced</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson Focus Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-crosshairs"></i> Today's Lesson Focus</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="introduceContent" class="form-label required">Introduce New Content</label>
+                        <textarea class="form-control" id="introduceContent" rows="3" required></textarea>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="deepenContent" class="form-label required">Deepen New Content</label>
+                        <textarea class="form-control" id="deepenContent" rows="3" required></textarea>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="complexTask" class="form-label required">Cognitively Complex Task</label>
+                        <textarea class="form-control" id="complexTask" rows="3" required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vocabulary Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-book"></i> Industry Specific Vocabulary</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="vocabTerms" class="form-label required">What terms (words, phrases) will my students need to learn?</label>
+                        <textarea class="form-control" id="vocabTerms" rows="5" placeholder="Enter one term per line" required></textarea>
+                        <div class="form-text">Enter each vocabulary term on a separate line.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required">How will my students interact with these terms?</label>
+                        <div id="vocabStrategies">
+                            <div class="vocab-strategy-option">
+                                <input type="checkbox" id="wordSort" name="vocabStrategy" value="Word Sort">
+                                <label for="wordSort">Word Sort</label>
+                            </div>
+                            <div class="vocab-strategy-option">
+                                <input type="checkbox" id="mentalLibrary" name="vocabStrategy" value="Mental Library">
+                                <label for="mentalLibrary">Mental Library</label>
+                            </div>
+                            <div class="vocab-strategy-option">
+                                <input type="checkbox" id="listGroupLabel" name="vocabStrategy" value="List-Group-Label">
+                                <label for="listGroupLabel">List-Group-Label</label>
+                            </div>
+                            <div class="vocab-strategy-option">
+                                <input type="checkbox" id="oneWrongTwoRight" name="vocabStrategy" value="One Wrong, Two Right">
+                                <label for="oneWrongTwoRight">One Wrong, Two Right</label>
+                            </div>
+                            <div class="vocab-strategy-option">
+                                <input type="checkbox" id="wordToolMatch" name="vocabStrategy" value="Word + Tool Match-Up">
+                                <label for="wordToolMatch">Word + Tool Match-Up</label>
+                            </div>
+                            <div class="vocab-strategy-option">
+                                <input type="checkbox" id="otherVocab" name="vocabStrategy" value="Other Vocab Strategies">
+                                <label for="otherVocab">Other Vocab Strategies</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANDA Framework Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-paw"></i> P.A.N.D.A. Module Planning Framework</h3>
+                <div class="panda-component">
+                    <label for="prepare" class="form-label required">Prepare</label>
+                    <textarea class="form-control" id="prepare" rows="2" required></textarea>
+                </div>
+                <div class="panda-component">
+                    <label for="activate" class="form-label required">Activate</label>
+                    <textarea class="form-control" id="activate" rows="2" required></textarea>
+                </div>
+                <div class="panda-component">
+                    <label for="navigate" class="form-label required">Navigate</label>
+                    <textarea class="form-control" id="navigate" rows="2" required></textarea>
+                </div>
+                <div class="panda-component">
+                    <label for="demonstrate" class="form-label required">Demonstrate</label>
+                    <textarea class="form-control" id="demonstrate" rows="2" required></textarea>
+                </div>
+                <div class="panda-component">
+                    <label for="articulate" class="form-label required">Articulate</label>
+                    <textarea class="form-control" id="articulate" rows="2" required></textarea>
+                </div>
+            </div>
+
+            <!-- Lesson Chunks Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-tasks"></i> Lesson Chunks</h3>
+                <div id="lessonChunks">
+                    <!-- Lesson chunk 1 - default -->
+                    <div class="chunk-section" id="chunk-1">
+                        <div class="chunk-header">
+                            <h5>Lesson Chunk 1</h5>
+                            <span class="remove-chunk" onclick="removeChunk(1)"><i class="fas fa-times"></i> Remove</span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chunk1Activity" class="form-label required">What are they doing? What tools/resources are needed?</label>
+                            <textarea class="form-control chunk-activity" id="chunk1Activity" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chunk1Assessment" class="form-label required">How will I know they got it?</label>
+                            <textarea class="form-control chunk-assessment" id="chunk1Assessment" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chunk1Progress" class="form-label required">How will I monitor student progress?</label>
+                            <textarea class="form-control chunk-progress" id="chunk1Progress" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chunk1PlanB" class="form-label">Plan B: What will I do if tech fails or the lesson is bombing?</label>
+                            <textarea class="form-control chunk-planb" id="chunk1PlanB" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chunk1Teaming" class="form-label">Teaming</label>
+                            <textarea class="form-control chunk-teaming" id="chunk1Teaming" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline-primary" onclick="addLessonChunk()">
+                    <i class="fas fa-plus"></i> Add Another Lesson Chunk
+                </button>
+            </div>
+
+            <!-- Differentiated Instruction Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-users"></i> Differentiated Instruction</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="strugglersNeeds" class="form-label">What do struggling students need to succeed?</label>
+                        <textarea class="form-control" id="strugglersNeeds" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="mostStudents" class="form-label">What do most students need?</label>
+                        <textarea class="form-control" id="mostStudents" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="rockstarReady" class="form-label">What are rock star students ready for?</label>
+                        <textarea class="form-control" id="rockstarReady" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Scale Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-chart-line"></i> Performance Scale - Specific to the Learning Target(s)</h3>
+                <p class="text-muted mb-4">Define what each performance level looks like for this lesson's learning targets.</p>
+                
+                <!-- Novice Level -->
+                <div class="performance-level">
+                    <div class="level-header">Novice Level</div>
+                    <div class="level-description">Minimal awareness of the learning target. May not yet understand the components or purpose of the learning target(s).</div>
+                    <label for="noviceLevel" class="form-label">Description of Novice Level Performance:</label>
+                    <textarea class="form-control" id="noviceLevel" rows="2"></textarea>
+                </div>
+                
+                <!-- In Pursuit of the Learning Target -->
+                <div class="performance-level">
+                    <div class="level-header">In Pursuit of the Learning Target</div>
+                    <div class="level-description">Demonstrates a basic awareness that the learning target(s) exist. Needs support to identify or explain the components and cannot yet connect them to the program of study.</div>
+                    <label for="inPursuit" class="form-label">Description of "In Pursuit" Performance:</label>
+                    <textarea class="form-control" id="inPursuit" rows="2"></textarea>
+                </div>
+                
+                <!-- Approaching the Learning Target -->
+                <div class="performance-level">
+                    <div class="level-header">Approaching the Learning Target</div>
+                    <div class="level-description">Is familiar with key vocabulary and concepts related to the lesson target(s). Can describe certain vocabulary terms but cannot yet apply the terms to successfully meet the learning target(s).</div>
+                    <label for="approaching" class="form-label">Description of "Approaching" Performance:</label>
+                    <textarea class="form-control" id="approaching" rows="2"></textarea>
+                </div>
+                
+                <!-- Meeting the Learning Target -->
+                <div class="performance-level">
+                    <div class="level-header">Meeting the Learning Target</div>
+                    <div class="level-description">Successfully meets the learning target(s) as defined.</div>
+                    <label for="meeting" class="form-label">Description of "Meeting" Performance:</label>
+                    <textarea class="form-control" id="meeting" rows="2"></textarea>
+                </div>
+                
+                <!-- Exceeding Expectations -->
+                <div class="performance-level">
+                    <div class="level-header">Exceeding Expectations</div>
+                    <div class="level-description">Applies the learning target(s) fluidly and with intention. Makes adaptations to meet the unique conditions of a specific task, explains the rationale behind each decision, and models its use for peers or in mentoring scenarios.</div>
+                    <label for="exceeding" class="form-label">Description of "Exceeding" Performance:</label>
+                    <textarea class="form-control" id="exceeding" rows="2"></textarea>
+                    <div class="mt-2">
+                        <label for="exceedingSkills" class="form-label">Additional skills demonstrated by exceeding students:</label>
+                        <textarea class="form-control" id="exceedingSkills" rows="2" placeholder="E.g., critical thinking, creativity, leadership..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflection Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-clipboard-check"></i> Lesson Reflection (Optional)</h3>
+                <div class="mb-3">
+                    <label for="whatWentWell" class="form-label">What went well? Why?</label>
+                    <textarea class="form-control" id="whatWentWell" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="whatNotAwesome" class="form-label">What was less than awesome? Why?</label>
+                    <textarea class="form-control" id="whatNotAwesome" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="howImprove" class="form-label">How can I improve this lesson?</label>
+                    <textarea class="form-control" id="howImprove" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="actionsImprove" class="form-label">What actions can I take to improve things in general?</label>
+                    <textarea class="form-control" id="actionsImprove" rows="2"></textarea>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-warning btn-lg w-100" onclick="previewLessonPlan()">
+                        <i class="fas fa-eye"></i> Preview Lesson Plan
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-success btn-lg w-100" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf"></i> Generate PDF
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Preview Area -->
+        <div id="previewArea" class="preview-area">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Lesson Plan Preview</h3>
+                <button type="button" class="btn btn-outline-secondary" onclick="closePreview()">
+                    <i class="fas fa-times"></i> Close Preview
+                </button>
+            </div>
+            <div id="lessonPlanPreview" class="lesson-plan-preview">
+                <!-- Preview will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    CCPS Post-Secondary Lesson Plan Generator &copy; 
+                    <script>
+                        document.write(new Date().getFullYear());
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="index.js"></script>
+</body>
+</html>
