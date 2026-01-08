@@ -44,7 +44,6 @@ function removeChunk(chunkId) {
         const chunkToRemove = document.getElementById(`chunk-${chunkId}`);
         if (chunkToRemove) {
             chunkToRemove.remove();
-            // Re-number remaining chunks
             renumberChunks();
         }
     } else {
@@ -63,7 +62,6 @@ function renumberChunks() {
         chunk.querySelector('h5').textContent = `Lesson Chunk ${chunkNumber}`;
         chunk.querySelector('.remove-chunk').setAttribute('onclick', `removeChunk(${chunkNumber})`);
 
-        // Update IDs of textareas
         const textareas = chunk.querySelectorAll('textarea');
         const types = ['activity', 'assessment', 'progress', 'planb', 'teaming'];
 
@@ -73,59 +71,47 @@ function renumberChunks() {
     });
 }
 
-// Preview the lesson plan
 function previewLessonPlan() {
-    // Validate form
-    if (!validateForm()) {
-        return;
-    }
-
-    // Get form values
+    if (!validateForm()) return;
     const formData = getFormData();
-
-    // Generate preview HTML
     const previewHTML = generatePreviewHTML(formData);
-
-    // Display preview
     document.getElementById('lessonPlanPreview').innerHTML = previewHTML;
     document.getElementById('previewArea').style.display = 'block';
-
-    // Scroll to preview
     document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Close the preview
 function closePreview() {
     document.getElementById('previewArea').style.display = 'none';
 }
 
-// Get all form data
+// Escape HTML entities for PDF safety
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 function getFormData() {
-    // Get basic information
     const instructor = document.getElementById('instructor').value;
     const date = document.getElementById('date').value;
     const learningGoals = document.getElementById('learningGoals').value;
-
-    // Get challenge level
     const challengeLevel = document.querySelector('input[name="challengeLevel"]:checked').value;
-
-    // Get lesson focus
     const introduceContent = document.getElementById('introduceContent').value;
     const deepenContent = document.getElementById('deepenContent').value;
     const complexTask = document.getElementById('complexTask').value;
-
-    // Get vocabulary data
     const vocabTerms = document.getElementById('vocabTerms').value.split('\n').filter(term => term.trim() !== '');
     const vocabStrategies = Array.from(document.querySelectorAll('input[name="vocabStrategy"]:checked')).map(cb => cb.value);
-
-    // Get PANDA data
     const prepare = document.getElementById('prepare').value;
     const activate = document.getElementById('activate').value;
     const navigate = document.getElementById('navigate').value;
     const demonstrate = document.getElementById('demonstrate').value;
     const articulate = document.getElementById('articulate').value;
 
-    // Get lesson chunks data
     const lessonChunks = [];
     for (let i = 1; i <= chunkCount; i++) {
         const activityElem = document.getElementById(`chunk${i}Activity`);
@@ -140,331 +126,386 @@ function getFormData() {
         }
     }
 
-    // Get differentiated instruction
     const strugglersNeeds = document.getElementById('strugglersNeeds').value;
     const mostStudents = document.getElementById('mostStudents').value;
     const rockstarReady = document.getElementById('rockstarReady').value;
-
-    // Get performance scale data
     const noviceLevel = document.getElementById('noviceLevel').value;
     const inPursuit = document.getElementById('inPursuit').value;
     const approaching = document.getElementById('approaching').value;
     const meeting = document.getElementById('meeting').value;
     const exceeding = document.getElementById('exceeding').value;
     const exceedingSkills = document.getElementById('exceedingSkills').value;
-
-    // Get reflection data
     const whatWentWell = document.getElementById('whatWentWell').value;
     const whatNotAwesome = document.getElementById('whatNotAwesome').value;
     const howImprove = document.getElementById('howImprove').value;
     const actionsImprove = document.getElementById('actionsImprove').value;
 
     return {
-        instructor,
-        date,
-        learningGoals,
-        challengeLevel,
-        introduceContent,
-        deepenContent,
-        complexTask,
-        vocabTerms,
-        vocabStrategies,
-        prepare,
-        activate,
-        navigate,
-        demonstrate,
-        articulate,
-        lessonChunks,
-        strugglersNeeds,
-        mostStudents,
-        rockstarReady,
-        noviceLevel,
-        inPursuit,
-        approaching,
-        meeting,
-        exceeding,
-        exceedingSkills,
-        whatWentWell,
-        whatNotAwesome,
-        howImprove,
-        actionsImprove
+        instructor, date, learningGoals, challengeLevel, introduceContent, deepenContent,
+        complexTask, vocabTerms, vocabStrategies, prepare, activate, navigate, demonstrate,
+        articulate, lessonChunks, strugglersNeeds, mostStudents, rockstarReady, noviceLevel,
+        inPursuit, approaching, meeting, exceeding, exceedingSkills, whatWentWell,
+        whatNotAwesome, howImprove, actionsImprove
     };
 }
 
-// Generate preview HTML
 function generatePreviewHTML(data) {
-    // Format date
     const dateObj = new Date(data.date);
     const formattedDate = dateObj.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    // Generate vocabulary terms list
     const vocabTermsList = data.vocabTerms.map(term => `<li>${term}</li>`).join('');
-
-    // Generate vocabulary strategies list
     const vocabStrategiesList = data.vocabStrategies.map(strategy => `<li>${strategy}</li>`).join('');
 
-    // Generate lesson chunks HTML with enhanced styling
     let lessonChunksHTML = '';
     data.lessonChunks.forEach((chunk, index) => {
         lessonChunksHTML += `
-            <div style="border: 2px solid #003366; border-radius: 8px; background: #f0f8ff; padding: 16px; margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                <h5 style="color: #003366; margin-top: 0; margin-bottom: 10px; font-size: 1.1em; letter-spacing: 1px;">Lesson Chunk ${index + 1}</h5>
-                <p style="margin: 4px 0;"><strong>Activity/Tools:</strong> ${chunk.activity}</p>
-                <p style="margin: 4px 0;"><strong>Assessment:</strong> ${chunk.assessment}</p>
-                <p style="margin: 4px 0;"><strong>Progress Monitoring:</strong> ${chunk.progress}</p>
-                <p style="margin: 4px 0;"><strong>Plan B:</strong> ${chunk.planB || 'N/A'}</p>
-                <p style="margin: 4px 0;"><strong>Teaming:</strong> ${chunk.teaming || 'N/A'}</p>
+            <div style="border: 2px solid #003366; border-radius: 8px; background: #f0f8ff; padding: 16px; margin-bottom: 18px;">
+                <h5 style="color: #003366; margin-top: 0; margin-bottom: 10px;">Lesson Chunk ${index + 1}</h5>
+                <p><strong>Activity/Tools:</strong> ${chunk.activity}</p>
+                <p><strong>Assessment:</strong> ${chunk.assessment}</p>
+                <p><strong>Progress Monitoring:</strong> ${chunk.progress}</p>
+                <p><strong>Plan B:</strong> ${chunk.planB || 'N/A'}</p>
+                <p><strong>Teaming:</strong> ${chunk.teaming || 'N/A'}</p>
             </div>
         `;
     });
 
-    // Build the full preview HTML
-    return `
-                <h2 class="text-center">CCPS Post-Secondary</h2>
-                <h3 class="text-center">Lesson Plan</h3>
-                <p class="text-center"><strong>Instructor:</strong> ${data.instructor} | <strong>Date:</strong> ${formattedDate}</p>
-                
-                <hr>
-                
-                <h4>What am I teaching today/this week?</h4>
-                <p>${data.learningGoals}</p>
-                
-                <table class="preview-table">
-                    <tr>
-                        <th colspan="3">How Challenging is this for my students?</th>
-                    </tr>
-                    <tr>
-                        <td ${data.challengeLevel === 'Basic' ? 'style="background-color: #d4edda;"' : ''}>Basic</td>
-                        <td ${data.challengeLevel === 'Moderate' ? 'style="background-color: #d4edda;"' : ''}>Moderate</td>
-                        <td ${data.challengeLevel === 'Advanced' ? 'style="background-color: #d4edda;"' : ''}>Advanced</td>
-                    </tr>
-                </table>
-                
-                <h4>What is the focus of today's lesson?</h4>
-                <table class="preview-table">
-                    <tr>
-                        <th>Introduce New Content</th>
-                        <th>Deepen New Content</th>
-                        <th>Cognitively Complex Task</th>
-                    </tr>
-                    <tr>
-                        <td>${data.introduceContent}</td>
-                        <td>${data.deepenContent}</td>
-                        <td>${data.complexTask}</td>
-                    </tr>
-                </table>
-                
-                <h4>Industry Specific Vocabulary</h4>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>What terms will my students need to learn?</h5>
-                        <ul>${vocabTermsList}</ul>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>How will my students interact with these terms?</h5>
-                        <ul>${vocabStrategiesList}</ul>
-                    </div>
+    return `<h2 style="text-align: center;">CCPS Post-Secondary</h2>
+            <h3 style="text-align: center;">Lesson Plan</h3>
+            <p style="text-align: center;"><strong>Instructor:</strong> ${data.instructor} | <strong>Date:</strong> ${formattedDate}</p>
+            <hr>
+            <h4>What am I teaching today/this week?</h4>
+            <p>${data.learningGoals}</p>
+            <table class="preview-table" width="100%">
+                <tr><th colspan="3" style="background:#eaf6ff;font-weight:bold;">How Challenging is this for my students?</th></tr>
+                <tr>
+                    <td ${data.challengeLevel === 'Basic' ? 'style="background-color: #d4edda;"' : ''}>Basic</td>
+                    <td ${data.challengeLevel === 'Moderate' ? 'style="background-color: #d4edda;"' : ''}>Moderate</td>
+                    <td ${data.challengeLevel === 'Advanced' ? 'style="background-color: #d4edda;"' : ''}>Advanced</td>
+                </tr>
+            </table>
+            <h4>What is the focus of today's lesson?</h4>
+            <table class="preview-table" width="100%">
+                <tr>
+                    <th style="background:#eaf6ff;font-weight:bold;">Introduce New Content</th>
+                    <th style="background:#eaf6ff;font-weight:bold;">Deepen New Content</th>
+                    <th style="background:#eaf6ff;font-weight:bold;">Cognitively Complex Task</th>
+                </tr>
+                <tr>
+                    <td>${data.introduceContent}</td>
+                    <td>${data.deepenContent}</td>
+                    <td>${data.complexTask}</td>
+                </tr>
+            </table>
+            <h4>Industry Specific Vocabulary</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>What terms will my students need to learn?</h5>
+                    <ul>${vocabTermsList}</ul>
                 </div>
-                
-                <h4>P.A.N.D.A. Module Planning Framework</h4>
-                <table class="preview-table">
-                    <tr>
-                        <th>P.A.N.D.A. Component</th>
-                        <th>Instructor Planning Notes</th>
-                    </tr>
-                    <tr>
-                        <td><strong>Prepare</strong></td>
-                        <td>${data.prepare}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Activate</strong></td>
-                        <td>${data.activate}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Navigate</strong></td>
-                        <td>${data.navigate}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Demonstrate</strong></td>
-                        <td>${data.demonstrate}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Articulate</strong></td>
-                        <td>${data.articulate}</td>
-                    </tr>
-                </table>
-                
-                <h4>Lesson Chunks</h4>
-                ${lessonChunksHTML}
-                
-                <h4>Differentiated Instruction</h4>
-                <table class="preview-table">
-                    <tr>
-                        <th>Strugglers (students who have skill/knowledge gaps)</th>
-                        <th>Most Students</th>
-                        <th>Rock Stars (students who already possess the knowledge/skills)</th>
-                    </tr>
-                    <tr>
-                        <td>${data.strugglersNeeds || 'N/A'}</td>
-                        <td>${data.mostStudents || '[Leave this column blank.]'}</td>
-                        <td>${data.rockstarReady || 'N/A'}</td>
-                    </tr>
-                </table>
-                
-                <h4>Performance Scale -- Specific to the Learning Target(s)</h4>
-                <table class="preview-table student-levels">
-                    <tr>
-                        <th width="20%">Novice Level</th>
-                        <td>
-                            <strong>Minimal awareness of the learning target. May not yet understand the components or purpose of the learning target(s).</strong>
-                            <br>${data.noviceLevel || 'Description not provided.'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>In Pursuit of the Learning Target</th>
-                        <td>
-                            <strong>Demonstrates a basic awareness that the learning target(s) exist. Needs support to identify or explain the components and cannot yet connect them to the program of study.</strong>
-                            <br>${data.inPursuit || 'Description not provided.'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Approaching the Learning Target</th>
-                        <td>
-                            <strong>Is familiar with key vocabulary and concepts related to the lesson target(s). Can describe certain vocabulary terms but cannot yet apply the terms to successfully meet the learning target(s).</strong>
-                            <br>${data.approaching || 'Description not provided.'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Meeting the Learning Target</th>
-                        <td>
-                            <strong>Successfully meets the learning target(s) as defined.</strong>
-                            <br>${data.meeting || 'Copy and paste the learning target(s) here.'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Exceeding Expectations</th>
-                        <td>
-                            <strong>Applies the learning target(s) fluidly and with intention. Makes adaptations to meet the unique conditions of a specific task, explains the rationale behind each decision, and models its use for peers or in mentoring scenarios.</strong>
-                            <br>${data.exceeding || 'Description not provided.'}
-                            ${data.exceedingSkills ? `<br><br><strong>Additional skills demonstrated:</strong> ${data.exceedingSkills}` : ''}
-                        </td>
-                    </tr>
-                </table>
-                
-                ${data.whatWentWell || data.whatNotAwesome || data.howImprove || data.actionsImprove ? `
-                <h4>Optional Reflection to Inform Future Teaching of this Lesson to Another Cohort</h4>
-                <table class="preview-table">
-                    <tr>
-                        <th>What went well? Why?</th>
-                        <td>${data.whatWentWell || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <th>What was less than awesome? Why?</th>
-                        <td>${data.whatNotAwesome || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <th>How can I improve this lesson?</th>
-                        <td>${data.howImprove || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <th>What actions can I take to improve things in general?</th>
-                        <td>${data.actionsImprove || 'N/A'}</td>
-                    </tr>
-                </table>
-                ` : ''}
-                
-                <hr>
-                <p class="text-center text-muted">Generated by CCPS Lesson Plan Generator on  ${new Date().toLocaleDateString()}</p>
-            `;
+                <div class="col-md-6">
+                    <h5>How will my students interact with these terms?</h5>
+                    <ul>${vocabStrategiesList}</ul>
+                </div>
+            </div>
+            <h4>P.A.N.D.A. Module Planning Framework</h4>
+            <table class="preview-table" width="100%">
+                <tr><th style="background:#eaf6ff;font-weight:bold;">P.A.N.D.A. Component</th><th style="background:#eaf6ff;font-weight:bold;">Instructor Planning Notes</th></tr>
+                <tr><td><strong>Prepare</strong></td><td>${data.prepare}</td></tr>
+                <tr><td><strong>Activate</strong></td><td>${data.activate}</td></tr>
+                <tr><td><strong>Navigate</strong></td><td>${data.navigate}</td></tr>
+                <tr><td><strong>Demonstrate</strong></td><td>${data.demonstrate}</td></tr>
+                <tr><td><strong>Articulate</strong></td><td>${data.articulate}</td></tr>
+            </table>
+            <h4>Lesson Chunks</h4>
+            ${lessonChunksHTML}
+            <h4>Differentiated Instruction</h4>
+            <table class="preview-table" width="100%">
+                <tr>
+                    <th style="background:#eaf6ff;font-weight:bold;">Strugglers</th>
+                    <th style="background:#eaf6ff;font-weight:bold;">Most Students</th>
+                    <th style="background:#eaf6ff;font-weight:bold;">Rock Stars</th>
+                </tr>
+                <tr>
+                    <td>${data.strugglersNeeds || 'N/A'}</td>
+                    <td>${data.mostStudents || '[Leave blank]'}</td>
+                    <td>${data.rockstarReady || 'N/A'}</td>
+                </tr>
+            </table>
+            <h4>Performance Scale -- Specific to the Learning Target(s)</h4>
+            <table class="preview-table student-levels" width="100%">
+                <tr><th style="background:#eaf6ff;font-weight:bold;">Novice Level</th><td><strong>Minimal awareness</strong><br>${data.noviceLevel || 'N/A'}</td></tr>
+                <tr><th style="background:#eaf6ff;font-weight:bold;">In Pursuit</th><td><strong>Basic awareness</strong><br>${data.inPursuit || 'N/A'}</td></tr>
+                <tr><th style="background:#eaf6ff;font-weight:bold;">Approaching</th><td><strong>Familiar with vocabulary</strong><br>${data.approaching || 'N/A'}</td></tr>
+                <tr><th style="background:#eaf6ff;font-weight:bold;">Meeting Target</th><td><strong>Successfully meets target</strong><br>${data.meeting || 'N/A'}</td></tr>
+                <tr><th style="background:#eaf6ff;font-weight:bold;">Exceeding</th><td><strong>Applies fluidly</strong><br>${data.exceeding || 'N/A'}${data.exceedingSkills ? `<br><br><strong>Additional skills:</strong> ${data.exceedingSkills}` : ''}</td></tr>
+            </table>
+            ${data.whatWentWell || data.whatNotAwesome || data.howImprove || data.actionsImprove ? `
+            <h4>Reflection</h4>
+            <table class="preview-table">
+                <tr><th style="background:#eaf6ff;font-weight:bold;">What went well?</th><td>${data.whatWentWell || 'N/A'}</td></tr>
+                <tr><th style="background:#eaf6ff;font-weight:bold;">What was less awesome?</th><td>${data.whatNotAwesome || 'N/A'}</td></tr>
+                <tr><th style="background:#eaf6ff;font-weight:bold;">How improve?</th><td>${data.howImprove || 'N/A'}</td></tr>
+                <tr><th style="background:#eaf6ff;font-weight:bold;">Actions to improve?</th><td>${data.actionsImprove || 'N/A'}</td></tr>
+            </table>` : ''}
+            <hr>
+            <p style="text-align: center; font-size: 0.9em; color: #666;">Generated on ${new Date().toLocaleDateString()}</p>`;
 }
 
-// Generate PDF
-async function generatePDF() {
-    // Validate form
-    if (!validateForm()) {
-        return;
-    }
+async function generateWordDocument() {
+    if (!validateForm()) return;
 
-    // Show loading state
-    const generateBtn = document.querySelector('button[onclick="generatePDF()"]');
+    const generateBtn = document.querySelector('button[onclick="generateWordDocument()"]');
     const originalText = generateBtn.innerHTML;
-    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Word Document...';
     generateBtn.disabled = true;
 
     try {
-        // Get form data and generate preview HTML
         const data = getFormData();
-        const previewHTML = generatePreviewHTML(data);
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-
-        // Create a temporary container for the preview HTML
-        const tempDiv = document.createElement('div');
-        tempDiv.style.width = '794px'; // A4 at 96dpi
-        tempDiv.style.minHeight = '1123px'; // A4 at 96dpi
-        tempDiv.style.background = 'white';
-        tempDiv.style.padding = '40px';
-        tempDiv.style.fontSize = '12px';
-        tempDiv.style.fontFamily = 'Times New Roman, Times, serif';
-        tempDiv.innerHTML = previewHTML;
-        tempDiv.style.position = 'fixed';
-        tempDiv.style.left = '-9999px';
-        document.body.appendChild(tempDiv);
-
-
-        // Use html2canvas to capture the content as a JPEG image (smaller size)
-        const canvas = await html2canvas(tempDiv, {
-            scale: 1, // Lower scale for smaller file size
-            useCORS: true,
-            backgroundColor: '#fff'
+        
+        const dateObj = new Date(data.date);
+        const formattedDate = dateObj.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
 
-        // Remove the temporary container
-        document.body.removeChild(tempDiv);
+        // Create HTML content for Word
+        const htmlContent = createWordHTML(data, formattedDate);
+        
+        // Convert HTML to .docx format
+        const docContent = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <meta charset='UTF-8'>
+                <style>
+                    body { 
+                        font-family: Calibri, Arial, sans-serif; 
+                        font-size: 11pt; 
+                        margin: 0.5in 0.5in 0.5in 0.5in;
+                        width: 7.5in;
+                    }
+                    h2 { text-align: center; font-size: 18pt; margin: 0 0 8pt 0; }
+                    h3 { text-align: center; font-size: 14pt; margin: 0 0 8pt 0; }
+                    table { width: 100%; border-collapse: collapse; margin: 3pt 0 10pt 0; table-layout: fixed; }
+                    th, td { border: 1pt solid #999; padding: 6pt; text-align: left; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+                    th { background-color: #e8e8e8; font-weight: bold; }
+                    .highlight { background-color: #d4edda; }
+                    hr { margin: 8pt 0; }
+                    p { margin: 6pt 0; word-wrap: break-word; overflow-wrap: break-word; }
+                    ul { margin: 0; padding-left: 20pt; }
+                    li { margin: 4pt 0; }
+                </style>
+            </head>
+            <body>
+            ${htmlContent}
+            </body>
+            </html>
+        `;
+        
+        // Create blob and download
+        const blob = new Blob([docContent], { 
+            type: 'application/msword'
+        });
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const fileName = `LessonPlan_${data.instructor.replace(/\s+/g, '_')}_${data.date}.doc`;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        alert(`Lesson plan Word document generated successfully: ${fileName}`);
 
-        // Calculate image dimensions for A4
-        const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG and set quality
-        const pdfWidth = 210; // mm
-        const pdfHeight = 297; // mm
-        const imgProps = pdf.getImageProperties(imgData);
-        const imgWidth = pdfWidth;
-        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-        let position = 0;
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-
-        // Add more pages if needed
-        let remainingHeight = imgHeight;
-        while (remainingHeight > pdfHeight) {
-            position = position - pdfHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-            remainingHeight -= pdfHeight;
-        }
-
-        // Alternative: Use jsPDF's html() method for even smaller PDFs (text-based)
-        // Uncomment below to use text-based PDF generation:
-        // await pdf.html(tempDiv, { x: 10, y: 10, width: 190 });
-
-        // Save PDF
-        const fileName = `LessonPlan_${data.instructor ? data.instructor.replace(/\s+/g, '_') : 'Unknown'}_${data.date || ''}.pdf`;
-        pdf.save(fileName);
-        alert(`Lesson plan PDF generated successfully: ${fileName}`);
     } catch (error) {
-        console.error('Error generating PDF:', error);
-        alert('There was an error generating the PDF. Please try again.');
+        console.error('Word Document Error:', error);
+        alert('Error generating Word document: ' + error.message);
     } finally {
-        // Restore button state
         generateBtn.innerHTML = originalText;
         generateBtn.disabled = false;
     }
 }
 
-// Validate form
+function createWordHTML(data, formattedDate) {
+    const vocabTermsList = data.vocabTerms.map(term => `<li>${term}</li>`).join('');
+    const vocabStrategiesList = data.vocabStrategies.map(strategy => `<li>${strategy}</li>`).join('');
+
+    let lessonChunksHTML = `<table style="width:100%; border-collapse:collapse; margin-bottom:15px; table-layout:fixed;">
+        <tr>
+            <th style="background-color:#dbefff; width:6%">#</th>
+            <th style="background-color:#dbefff;">Activity/Tools</th>
+            <th style="background-color:#dbefff;">Assessment</th>
+            <th style="background-color:#dbefff;">Progress Monitoring</th>
+            <th style="background-color:#dbefff;">Plan B</th>
+            <th style="background-color:#dbefff;">Teaming</th>
+        </tr>`;
+    data.lessonChunks.forEach((chunk, index) => {
+        lessonChunksHTML += `
+            <tr>
+                <td style="text-align:center;">${index + 1}</td>
+                <td>${chunk.activity}</td>
+                <td>${chunk.assessment}</td>
+                <td>${chunk.progress}</td>
+                <td>${chunk.planB || 'N/A'}</td>
+                <td>${chunk.teaming || 'N/A'}</td>
+            </tr>
+        `;
+    });
+    lessonChunksHTML += '</table>';
+
+    return `
+        <h2>CCPS Post-Secondary</h2>
+        <h3>Lesson Plan</h3>
+        <p style="text-align: center;"><strong>Instructor:</strong> ${data.instructor} | <strong>Date:</strong> ${formattedDate}</p>
+        
+        <hr>
+        
+        <h4>What am I teaching today/this week?</h4>
+        <p>${data.learningGoals}</p>
+        
+        <h4>How Challenging is this for my students?</h4>
+        <table>
+            <tr>
+                <td style="text-align: center; background-color:${data.challengeLevel === 'Basic' ? '#d4edda' : 'transparent'}; font-weight:${data.challengeLevel === 'Basic' ? 'bold' : 'normal'};">Basic</td>
+                <td style="text-align: center; background-color:${data.challengeLevel === 'Moderate' ? '#d4edda' : 'transparent'}; font-weight:${data.challengeLevel === 'Moderate' ? 'bold' : 'normal'};">Moderate</td>
+                <td style="text-align: center; background-color:${data.challengeLevel === 'Advanced' ? '#d4edda' : 'transparent'}; font-weight:${data.challengeLevel === 'Advanced' ? 'bold' : 'normal'};">Advanced</td>
+            </tr>
+        </table>
+        
+        <h4>What is the focus of today's lesson?</h4>
+        <table>
+            <tr>
+                <th style="background-color:#dbefff;">Introduce New Content</th>
+                <th style="background-color:#dbefff;">Deepen New Content</th>
+                <th style="background-color:#dbefff;">Cognitively Complex Task</th>
+            </tr>
+            <tr>
+                <td>${data.introduceContent}</td>
+                <td>${data.deepenContent}</td>
+                <td>${data.complexTask}</td>
+            </tr>
+        </table>
+        
+        <h4>Industry Specific Vocabulary</h4>
+        <table>
+            <tr>
+                <th style="background-color:#dbefff;">Terms to Learn</th>
+                <th style="background-color:#dbefff;">Interaction Strategies</th>
+            </tr>
+            <tr>
+                <td><ul>${vocabTermsList}</ul></td>
+                <td><ul>${vocabStrategiesList}</ul></td>
+            </tr>
+        </table>
+        
+        <h4>P.A.N.D.A. Module Planning Framework</h4>
+        <table>
+            <tr>
+                <th style="width: 25%; background-color:#dbefff;">Component</th>
+                <th style="background-color:#dbefff;">Notes</th>
+            </tr>
+            <tr>
+                <td><strong>Prepare</strong></td>
+                <td>${data.prepare}</td>
+            </tr>
+            <tr>
+                <td><strong>Activate</strong></td>
+                <td>${data.activate}</td>
+            </tr>
+            <tr>
+                <td><strong>Navigate</strong></td>
+                <td>${data.navigate}</td>
+            </tr>
+            <tr>
+                <td><strong>Demonstrate</strong></td>
+                <td>${data.demonstrate}</td>
+            </tr>
+            <tr>
+                <td><strong>Articulate</strong></td>
+                <td>${data.articulate}</td>
+            </tr>
+        </table>
+        
+        <h4>Lesson Chunks</h4>
+        ${lessonChunksHTML}
+        
+        <h4>Differentiated Instruction</h4>
+        <table>
+            <tr>
+                <th style="background-color:#dbefff;">Strugglers</th>
+                <th style="background-color:#dbefff;">Most Students</th>
+                <th style="background-color:#dbefff;">Rock Stars</th>
+            </tr>
+            <tr>
+                <td>${data.strugglersNeeds || 'N/A'}</td>
+                <td>${data.mostStudents || 'N/A'}</td>
+                <td>${data.rockstarReady || 'N/A'}</td>
+            </tr>
+        </table>
+        
+        <h4>Performance Scale -- Specific to the Learning Target(s)</h4>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; table-layout:fixed;">
+            <tr>
+                <th style="width: 25%; background-color:#dbefff;">Level</th>
+                <th style="background-color:#dbefff;">Description</th>
+            </tr>
+            <tr>
+                <td><strong>Novice Level</strong></td>
+                <td><span style="font-weight:bold; color:#333;">Minimal awareness</span><br><span style="font-style:italic; color:#888; font-size:10pt;">${data.noviceLevel || 'N/A'}</span></td>
+            </tr>
+            <tr>
+                <td><strong>In Pursuit</strong></td>
+                <td><span style="font-weight:bold; color:#333;">Basic awareness</span><br><span style="font-style:italic; color:#888; font-size:10pt;">${data.inPursuit || 'N/A'}</span></td>
+            </tr>
+            <tr>
+                <td><strong>Approaching</strong></td>
+                <td><span style="font-weight:bold; color:#333;">Familiar with vocabulary</span><br><span style="font-style:italic; color:#888; font-size:10pt;">${data.approaching || 'N/A'}</span></td>
+            </tr>
+            <tr>
+                <td><strong>Meeting Target</strong></td>
+                <td><span style="font-weight:bold; color:#333;">Successfully meets target</span><br><span style="font-style:italic; color:#888; font-size:10pt;">${data.meeting || 'N/A'}</span></td>
+            </tr>
+            <tr>
+                <td><strong>Exceeding</strong></td>
+                <td><span style="font-weight:bold; color:#333;">Applies fluidly</span><br><span style="font-style:italic; color:#888; font-size:10pt;">${data.exceeding || 'N/A'}${data.exceedingSkills ? `<br/><strong>Additional skills:</strong> ${data.exceedingSkills}` : ''}</span></td>
+            </tr>
+        </table>
+        
+        ${data.whatWentWell || data.whatNotAwesome || data.howImprove || data.actionsImprove ? `
+        <h4>Reflection</h4>
+        <table>
+            <tr>
+                <th style="width: 30%; background-color:#dbefff;">Question</th>
+                <th style="background-color:#dbefff;">Response</th>
+            </tr>
+            <tr>
+                <td><strong>What went well?</strong></td>
+                <td>${data.whatWentWell || 'N/A'}</td>
+            </tr>
+            <tr>
+                <td><strong>What was less awesome?</strong></td>
+                <td>${data.whatNotAwesome || 'N/A'}</td>
+            </tr>
+            <tr>
+                <td><strong>How improve?</strong></td>
+                <td>${data.howImprove || 'N/A'}</td>
+            </tr>
+            <tr>
+                <td><strong>Actions to improve?</strong></td>
+                <td>${data.actionsImprove || 'N/A'}</td>
+            </tr>
+        </table>` : ''}
+        
+        <hr>
+        <p style="text-align: center; font-size: 9pt; color: #666;">Generated on ${new Date().toLocaleDateString()}</p>
+    `;
+}
+
 function validateForm() {
     const requiredFields = document.querySelectorAll('[required]');
     let isValid = true;
@@ -472,14 +513,11 @@ function validateForm() {
     for (let field of requiredFields) {
         if (!field.value.trim()) {
             field.classList.add('is-invalid');
-            isValid = false;
-
-            // Scroll to first invalid field
-            if (isValid === false) {
+            if (isValid) {
                 field.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 field.focus();
-                break;
             }
+            isValid = false;
         } else {
             field.classList.remove('is-invalid');
         }
@@ -488,14 +526,11 @@ function validateForm() {
     if (!isValid) {
         alert('Please fill in all required fields (marked with *).');
     }
-
     return isValid;
 }
 
-// Initialize date field with today's date
 document.getElementById('date').valueAsDate = new Date();
 
-// Add validation styling on input
 document.querySelectorAll('[required]').forEach(field => {
     field.addEventListener('input', function () {
         if (this.value.trim()) {
